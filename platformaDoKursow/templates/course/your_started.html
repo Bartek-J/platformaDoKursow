@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Courses you joined.</h2>
+<ol>
+{% for course in courses %}
+<li>
+{{ course.course.name }}
+{{ course.created_at }}
+{{ course.progress }}
+</li>
+{% endfor %}
+</ol>
+
+{% endblock %}

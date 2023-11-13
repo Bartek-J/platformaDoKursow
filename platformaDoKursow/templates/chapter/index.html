@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Edit chapter</h2>
+
+<form method="post" action="{% url 'chapter' course_id chapter_id %}" style='width:100%'>
+    {% csrf_token %}
+    {{ myform.media }}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+<a href="{% url 'course_details' course_id %}">Go back</a>
+
+{% load static %}
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+{% endblock %}

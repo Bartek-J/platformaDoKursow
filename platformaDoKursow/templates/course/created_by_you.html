@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Courses created by you</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Course Name</th>
+            <th>Creation date</th>
+            <th>Chapters amount</th>
+            <th>Invitation token</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+        <tr>
+            <td>{{ course.name }}</td>
+            <td>{{ course.created_at }}</td>
+            <td>{{ course.chapter_count }}</td>
+            <td>
+                {% if course.invitation_token %}
+                <button id="btn-{{ course.id }}" class="btn btn-primary btn-sm" onclick="revealToken('{{ course.id }}')">Reveal Token</button>
+                <div id="token-{{ course.id }}" class="d-none">
+                    {{ course.invitation_token }}
+                </div>
+                {% else %}
+                    <form method="POST" action="{% url 'generate_invititation_token' course.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">Generate Token</button>
+                    </form>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'course_details' course.id %}" class="btn btn-success btn-sm">Details</a>
+                <form method="POST" action="/courses/delete?id={{ course.id }}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a class="btn btn-primary" href="{% url 'create_course' %}">Create Course</a>
+
+<script>
+    function revealToken(courseId) {
+        const tokenDiv = document.getElementById(`token-${courseId}`);
+        const tokenBtn = document.getElementById(`btn-${courseId}`);
+        if (tokenDiv && tokenBtn) {
+            tokenDiv.classList.toggle('d-none');
+            tokenBtn.classList.toggle('d-none');
+        }
+    }
+    </script>
+
+{% endblock %}

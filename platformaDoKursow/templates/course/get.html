@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>All publicly available courses.</h2>
+<ol>
+{% for course in courses %}
+<li>
+{{ course.name }}
+{{ course.created_at }}
+{{ course.creator.username }}
+</li>
+{% endfor %}
+</ol>
+
+{% endblock %}

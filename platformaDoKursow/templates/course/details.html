@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Course details</h3>
+
+<ul>
+    <li>Name: {{ course.name }}</li>
+    <li>Public: {{ course.public|yesno:"Yes,No" }}</li>
+    <li>Creation date: {{ course.created_at }}</li>
+    <li>Invitation token: {{ course.invitation_token }}</li>
+    <li><a href="{% url 'edit_course' course.id %}">Edit</a></li>
+    <li>Participants: {{ course.participants.count }}
+        Show list
+        {% for participant in course.participants.all %}
+        {{ participant.user.name }} Remove from course
+        {% endfor %}
+    </li>
+</ul>
+
+<h3>Chapters</h3>
+<ol>
+{% for chapter in course.chapters.all %}
+<li>
+{{ chapter.title }}
+<a href="{% url 'chapter' course.id chapter.id %}" class="">Details</a>
+remove chapter
+{% if chapter.quiz %}
+edit chapter quiz
+{% else %}
+add quiz for chapter
+{% endif %}
+</li>
+{% endfor %}
+
+<li style="list-style-type: none;">
+    <a href="{% url 'create_chapter' course.id %}" class="">Add new chapter</a>
+</li>
+</ol>
+
+
+{% endblock %}
