@@ -13,6 +13,8 @@ from platformaDoKursow.views.course.course_details_view import CourseDetailsView
 from platformaDoKursow.views.course.generate_invitation_token_view import GenerateInvitationTokenView
 from platformaDoKursow.views.chapter.chapter_view import ChapterView
 from platformaDoKursow.views.chapter.create_chapter_view import CreateChapterView
+from platformaDoKursow.views.chapter.remove_chapter_view import RemoveChapterView
+from platformaDoKursow.views.quiz.manage_quiz_view import ManageQuizView
 from django.conf import settings
 
 
@@ -21,7 +23,7 @@ urlpatterns = [
     path('', test_view.test, name='home'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
-    path('register/', registration_view, name='register'),
+    path('register', registration_view, name='register'),
     path('accounts/login/', login_redirect, name='redirect'),
 
     path('courses', CourseView.as_view(), name='courses'),
@@ -34,8 +36,9 @@ urlpatterns = [
 
     path('courses/<int:course_id>/chapters/create', CreateChapterView.as_view(), name='create_chapter'),
     path('courses/<int:course_id>/chapters/<int:id>', ChapterView.as_view(), name='chapter'),
+    path('courses/<int:course_id>/chapters/<int:id>/remove', RemoveChapterView.as_view(), name='remove_chapter'),
 
-    # path('courses/<int:id>/chapters/<int:id>/quiz'),
+    path('courses/<int:course_id>/chapters/<int:chapter_id>/quiz', ManageQuizView.as_view(), name='manage_quiz'),
 
     path('course/<int:id>', ShowCourseView.as_view(), name='show_course'),
 

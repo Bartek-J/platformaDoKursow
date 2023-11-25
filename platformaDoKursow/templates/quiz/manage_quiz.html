@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <h2>Tworzenie Quizu</h2>
+        <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
+            {% csrf_token %}
+            <!-- Pola dla modelu Quiz -->
+            <div class="form-group">
+                <label>Tytuł Quizu:</label>
+                <input type="text" class="form-control" name="quiz_title" required>
+            </div>
+            <div class="form-group">
+                <label>Opis Quizu:</label>
+                <textarea class="form-control" name="quiz_description"></textarea>
+            </div>
+            <!-- Tutaj będą dodawane pytania -->
+            <div id="question-section">
+            </div>
+            <button type="button" class="btn btn-primary" id="add-question">Dodaj Pytanie</button>
+            <br><br>
+            {% comment %} <input type="submit" class="btn btn-success" value="Zapisz Quiz"> {% endcomment %}
+            <input type="button" id="save-quiz" class="btn btn-success" value="Zapisz Quiz2">
+
+        </form>
+    </div>
+
+    <!-- Skrypty JavaScript -->
+    <script>
+        document.getElementById('add-question').addEventListener('click', function() {
+            var questionSection = document.getElementById('question-section');
+            var questionCount = questionSection.children.length + 1;
+
+            // Tworzenie nowego pytania
+            var questionDiv = document.createElement('div');
+            questionDiv.classList.add('form-group', 'question-div');
+            questionDiv.innerHTML = `
+                <label>Pytanie ${questionCount}:</label>
+                <input type="text" class="form-control question-text" name="question_${questionCount}_text" required>
+                <div class="answers" id="answers_${questionCount}">
+                    <!-- Tutaj będą odpowiedzi -->
+                </div>
+                <button type="button" class="btn btn-secondary add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>
+                <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
+            `;
+            questionSection.appendChild(questionDiv);
+
+            // Handle removing a question
+            questionDiv.querySelector('.remove-question').addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+
+            // Handle adding an answer
+            questionDiv.getElementsByClassName('add-answer')[0].addEventListener('click', function(event) {
+                var questionNumber = event.target.getAttribute('data-question');
+                var answersDiv = document.getElementById('answers_' + questionNumber);
+                var answerCount = answersDiv.children.length + 1;
+
+                // Tworzenie nowej odpowiedzi
+                var answerDiv = document.createElement('div');
+                answerDiv.classList.add('answer-div');
+                answerDiv.innerHTML = `
+                    <input type="text" class="form-control answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
+                    <input type="checkbox" class="answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
+                    <label>Poprawna odpowiedź?</label>
+                    <button type="button" class="btn btn-danger remove-answer">Usuń Odpowiedź</button>
+                `;
+
+                answersDiv.appendChild(answerDiv);
+
+                // Handle removing an answer
+                answerDiv.querySelector('.remove-answer').addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+        });
+        document.getElementById('save-quiz').addEventListener('click', function() {
+            var quizData = {
+                title: document.getElementsByName('quiz_title')[0].value,
+                description: document.getElementsByName('quiz_description')[0].value,
+                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                questions: []
+            };
+
+            var questionSections = document.getElementById('question-section').children;
+            for (var i = 0; i < questionSections.length; i++) {
+                var question = {
+                    text: questionSections[i].querySelector('[name^="question_"]').value,
+                    answers: []
+                };
+
+                var answersDivs = questionSections[i].getElementsByClassName('answer-div');
+                for (var j = 0; j < answersDivs.length; j++) {
+                    var answerText = answersDivs[j].querySelector('.answer-text').value;
+                    var answerCorrect = answersDivs[j].querySelector('.answer-correct').checked;
+                    question.answers.push({
+                        text: answerText,
+                        correct: answerCorrect
+                    });
+                }
+
+                quizData.questions.push(question);
+            }
+
+            // Tutaj możesz wysłać quizData jako JSON do serwera używając np. fetch API
+            console.log(quizData); // Tymczasowo logujemy dane do konsoli
+
+            fetch(document.getElementById('myForm').action, {
+                method: 'POST',
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    'Content-Type': 'application/json' // Funkcja getCookie do pobrania tokenu CSRF
+                },
+                body: JSON.stringify(quizData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Przetwarzanie odpowiedzi
+                window.location.href = '/courses';
+            })
+            .catch(error => {
+                console.error('Błąd:', error);
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    {% endblock %}

@@ -10,12 +10,18 @@
     <li>Creation date: {{ course.created_at }}</li>
     <li>Invitation token: {{ course.invitation_token }}</li>
     <li><a href="{% url 'edit_course' course.id %}">Edit</a></li>
-    <li>Participants: {{ course.participants.count }}
+    {% with users=course.participants.count %}
+    {% if users %}
+    <li>Participants: {{ users }}
         Show list
         {% for participant in course.participants.all %}
         {{ participant.user.name }} Remove from course
         {% endfor %}
     </li>
+    {% else %}
+    <li>Course has no participants</li>
+    {% endif %}
+    {% endwith %}
 </ul>
 
 <h3>Chapters</h3>
@@ -24,12 +30,17 @@
 <li>
 {{ chapter.title }}
 <a href="{% url 'chapter' course.id chapter.id %}" class="">Details</a>
-remove chapter
+<form method='POST' action="{% url 'remove_chapter' course.id chapter.id %}">
+<button type='submit'>remove</button>
+{% csrf_token %}
+</form>
+<a href="{% url 'manage_quiz' course.id chapter.id %}">
 {% if chapter.quiz %}
-edit chapter quiz
-{% else %}
-add quiz for chapter
-{% endif %}
+    edit chapter quiz
+    {% else %}
+    add quiz for chapter
+    {% endif %}
+</a>
 </li>
 {% endfor %}
 

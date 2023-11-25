@@ -18,7 +18,7 @@
         <tr>
             <td>{{ course.name }}</td>
             <td>{{ course.created_at }}</td>
-            <td>{{ course.chapter_count }}</td>
+            <td>{{ course.chapters_count }}</td>
             <td>
                 {% if course.invitation_token %}
                 <button id="btn-{{ course.id }}" class="btn btn-primary btn-sm" onclick="revealToken('{{ course.id }}')">Reveal Token</button>
