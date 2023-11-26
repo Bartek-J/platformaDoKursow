@@ -15,11 +15,12 @@ from platformaDoKursow.views.chapter.chapter_view import ChapterView
 from platformaDoKursow.views.chapter.create_chapter_view import CreateChapterView
 from platformaDoKursow.views.chapter.remove_chapter_view import RemoveChapterView
 from platformaDoKursow.views.quiz.manage_quiz_view import ManageQuizView
+from platformaDoKursow.views.chapter.upload_image_view import custom_ckeditor_upload
 from django.conf import settings
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
     path('', test_view.test, name='home'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
@@ -44,6 +45,7 @@ urlpatterns = [
 
 
     path('courses/<str:action>', CourseView.as_view(), name='other_courses'),
+    path('ckeditor/upload/', custom_ckeditor_upload, name='ckeditor_upload'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ]
 
