@@ -15,6 +15,14 @@
                 <label>Opis Quizu:</label>
                 <textarea class="form-control" name="quiz_description"></textarea>
             </div>
+            <div class="form-group">
+                <label>Procent wymagany do zaliczenia quizu:</label>
+                <input type="number" class="form-control" name="percentage_required" required value="50" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>Ilość możliwych podejść (ustaw 0 aby była nieograniczona)</label>
+                <input type="number" class="form-control" name="allowed_attempts" required value="1" min="0" max="100">
+            </div>
             <!-- Tutaj będą dodawane pytania -->
             <div id="question-section">
             </div>
@@ -32,14 +40,17 @@
             var questionSection = document.getElementById('question-section');
             var questionCount = questionSection.children.length + 1;
 
-            // Tworzenie nowego pytania
+            // Creating a new question
             var questionDiv = document.createElement('div');
             questionDiv.classList.add('form-group', 'question-div');
             questionDiv.innerHTML = `
                 <label>Pytanie ${questionCount}:</label>
                 <input type="text" class="form-control question-text" name="question_${questionCount}_text" required>
+                <input type="number" class="form-control question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" max="10", value="1">
+                <input type="checkbox" class="question-partial" name="question_${questionCount}_partial">
+                <label>Czy akceptowane częściowo?</label>
                 <div class="answers" id="answers_${questionCount}">
-                    <!-- Tutaj będą odpowiedzi -->
+                    <!-- Answers will be here -->
                 </div>
                 <button type="button" class="btn btn-secondary add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>
                 <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
@@ -80,6 +91,8 @@
                 title: document.getElementsByName('quiz_title')[0].value,
                 description: document.getElementsByName('quiz_description')[0].value,
                 csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                percentage_required: document.getElementsByName('percentage_required')[0].value,
+                allowed_attempts: document.getElementsByName('allowed_attempts')[0].value,
                 questions: []
             };
 
@@ -87,6 +100,8 @@
             for (var i = 0; i < questionSections.length; i++) {
                 var question = {
                     text: questionSections[i].querySelector('[name^="question_"]').value,
+                    points: questionSections[i].querySelector('.question-points').value,
+                    partially_accepted: questionSections[i].querySelector('.question-partial').checked,
                     answers: []
                 };
 

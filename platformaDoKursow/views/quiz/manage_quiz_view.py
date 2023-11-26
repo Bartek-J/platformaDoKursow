@@ -25,8 +25,13 @@ class ManageQuizView(View):
         )
 
     def post(self, request: HttpRequest, course_id: int, chapter_id: int) -> HttpRequest:
-        request_data = QuizValidator(loads(request.body))
+        try:
+            chapter = Chapter.objects.get(id=chapter_id, course_id=course_id, course__creator=request.user)
+        except Chapter.DoesNotExist:
+            return JsonResponse(data={'errors': 'Chapter not found.'}, status=400)
+
+        request_data = QuizValidator(loads(request.body), chapter)
         if request_data.is_valid():
             request_data.save()
             return JsonResponse(data={'message': 'success'})
-        return JsonResponse(data=list(request_data.errors))
+        return JsonResponse(data={'errors': list(request_data.errors)}, status=400)
