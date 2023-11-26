@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from ckeditor.fields import RichTextField
 
 
 class Course(models.Model):
@@ -20,7 +21,7 @@ class Chapter(models.Model):
         db_table = 'chapters'
 
     title = models.CharField(null=False, blank=False, max_length=255)
-    content = models.TextField(null=False, blank=False)
+    content = RichTextField(null=False, blank=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='chapters')
 
 

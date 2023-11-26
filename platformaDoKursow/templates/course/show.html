@@ -2,8 +2,20 @@
 
 {% block content %}
 
-Course name
-Course description
+Name: {{ course.name }}
+Descriptions: {{ course.descriptions }}
+
+<ol>
+{% for chapter in course.chapters.all %}
+<li>{{ chapter.title }}</li>
+    <div class="rich-content">
+        {{ chapter.content|safe }}
+    </div>
+{% endfor %}
+</ol>
 
 
+{% load static %}
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
 {% endblock %}

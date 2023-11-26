@@ -4,6 +4,7 @@ attrs
 billiard
 boto3
 botocore
+bleach
 cachetools
 celery
 certifi
