@@ -44,7 +44,7 @@ class Question(models.Model):
     type = models.CharField(null=False, blank=False, max_length=255)
     points = models.IntegerField(null=False, blank=False)
     partially_accepted = models.BooleanField(blank=False, null=False, default=True)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -55,7 +55,7 @@ class Answer(models.Model):
 
     text = models.CharField(null=False, blank=False, max_length=255)
     is_correct = models.BooleanField(null=False, blank=False, default=False)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -74,11 +74,12 @@ class Participant(models.Model):
 class QuizAttempt(models.Model):
     class Meta:
         db_table = 'quiz_attempts'
-        unique_together = ('user_id', 'course_id')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     points = models.FloatField()
+    percentage = models.FloatField()
+    quiz_passed = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

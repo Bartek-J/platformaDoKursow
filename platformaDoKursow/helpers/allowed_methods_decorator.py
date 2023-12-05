@@ -9,4 +9,5 @@ def allowed_methods(allowed_methods: str):
                 return HttpResponse('Method Not Allowed', status=405)
             return func(request, *args, **kwargs)
         return wrapper
+
     return decorator

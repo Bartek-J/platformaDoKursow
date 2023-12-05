@@ -15,7 +15,14 @@
     <li>Participants: {{ users }}
         Show list
         {% for participant in course.participants.all %}
-        {{ participant.user.name }} Remove from course
+        {{ participant.user.name }}
+        {% widthratio participant.progress 1 1 %}
+        <form method='POST' action={% url 'remove_user_from_course' %}>
+            {% csrf_token %}
+            <input type='hidden' value='{{ participant.id }}' name='user_id'>
+            <input type='submit' value='Remove'>
+        </form>
+
         {% endfor %}
     </li>
     {% else %}

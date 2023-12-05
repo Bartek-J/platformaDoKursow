@@ -12,6 +12,7 @@ class QuizValidator:
     def is_valid(self) -> bool:
         try:
             self._validate()
+
         except KeyError:
             self.errors.add('Wrong request structure')
         return False if self.errors else True
@@ -61,21 +62,21 @@ class QuizValidator:
         quiz.save()
         answers = []
         for question in self.request_data['questions']:
-            question = Question(
+            question_obj = Question(
                 text=question['text'],
                 type='text_question',
                 points=question['points'],
                 partially_accepted=int(question['partially_accepted']),
                 quiz=quiz
             )
-            question.save()
+            question_obj.save()
 
             answers.extend(
                 [
                     Answer(
                         text=answer['text'],
-                        is_correct=answer['is_correct'],
-                        question=question
+                        is_correct=answer['correct'],
+                        question=question_obj
                     ) for answer in question['answers']
                 ]
             )

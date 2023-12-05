@@ -13,13 +13,13 @@ from django.utils.decorators import method_decorator
 class JoinCourseView(View):
     def post(self, request: HttpRequest) -> HttpResponse:
         try:
-            course = Course.objects.get(invitation_token=request.GET.get('invitation_token'))
+            course = Course.objects.get(invitation_token=request.POST.get('invitation_token'))
         except Course.DoesNotExist:
             messages.error(request, 'Course not found.')
             return redirect('courses')
 
         if course.creator == request.user:
-            messages.error('You cannot join your own course')
+            messages.error(request, 'You cannot join your own course')
             return redirect('courses')
 
         try:
@@ -27,4 +27,5 @@ class JoinCourseView(View):
         except IntegrityError:
             messages.error(request, 'You already joined this course')
 
+        messages.success(request, 'You successfully joined the course.')
         return redirect('course', course.id)

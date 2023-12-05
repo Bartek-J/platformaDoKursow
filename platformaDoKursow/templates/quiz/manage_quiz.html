@@ -4,6 +4,9 @@
 
     <div class="container mt-5">
         <h2>Tworzenie Quizu</h2>
+        <div id='errors'>
+
+        </div>
         <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
             {% csrf_token %}
             <!-- Pola dla modelu Quiz -->
@@ -119,24 +122,34 @@
             }
 
             // Tutaj możesz wysłać quizData jako JSON do serwera używając np. fetch API
-            console.log(quizData); // Tymczasowo logujemy dane do konsoli
+            //console.log(quizData); // Tymczasowo logujemy dane do konsoli
 
             fetch(document.getElementById('myForm').action, {
                 method: 'POST',
                 headers: {
                     "X-CSRFToken": getCookie("csrftoken"),
-                    'Content-Type': 'application/json' // Funkcja getCookie do pobrania tokenu CSRF
+                    'Content-Type': 'application/json' // Function getCookie to retrieve CSRF token
                 },
                 body: JSON.stringify(quizData)
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data); // Przetwarzanie odpowiedzi
-                window.location.href = '/courses';
+                const response_data = data; // Correct the spelling here
+                if (response_data.errors) { // Add parentheses around condition
+                    window.location.href = '#myForm';
+                    document.getElementById('errors').innerHTML = response_data.errors.join(', ');
+                } else {
+                    window.location.href = '/courses';
+                }
+
+                console.log(response_data); // Correct the spelling here
+
             })
             .catch(error => {
-                console.error('Błąd:', error);
+                console.error('Error:', error);
             });
+
+            console.log(data)
         });
 
         function getCookie(name) {

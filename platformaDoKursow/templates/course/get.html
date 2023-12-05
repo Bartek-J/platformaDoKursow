@@ -13,4 +13,11 @@
 {% endfor %}
 </ol>
 
+<form method='POST' action="{% url 'join_course' %}">
+    Join course by invitation token:
+    {% csrf_token %}
+    <input type='text' name='invitation_token' required>
+    <input type='submit' value='Join'>
+</form>
+
 {% endblock %}

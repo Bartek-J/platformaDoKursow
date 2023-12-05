@@ -146,10 +146,11 @@ CKEDITOR_CONFIGS = {
             ['Image'],
             ['Font', 'FontSize', 'TextColor'],
             ['CodeSnippet'],
+            ['Mathjax']
         ],
             'width': '100%',
             'extraPlugins': ','.join([
-                'codesnippet',
+                'codesnippet', 'mathjax'
             ]),
         },
 }

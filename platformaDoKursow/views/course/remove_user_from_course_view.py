@@ -9,13 +9,13 @@ from django.utils.decorators import method_decorator
 
 
 @method_decorator(login_required, name='dispatch')
-class LeaveCourseView(View):
-    def post(self, request: HttpRequest) -> HttpResponse:
+class RemoveUserFromCourseView(View):
+    def post(self, request: HttpRequest, course_id: int) -> HttpResponse:
         try:
-            Participant.objects.get(user=request.user, course_id=request.POST.get('course_id')).delete()
+            Participant.objects.get(id=request.POST.get('course_id'), course__creator=request.user).delete()
         except Participant.DoesNotExist:
-            messages.error(request, 'Course not found.')
-            return redirect('courses')
+            messages.error(request, 'User for selected course not found.')
+            return redirect('course_details', course_id)
 
         messages.success(request, 'Succesfully left the course.')
-        return redirect('courses')
+        return redirect('course_details', course_id)

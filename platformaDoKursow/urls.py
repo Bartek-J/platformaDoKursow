@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf.urls.static import static
-from platformaDoKursow.views import test_view
+from platformaDoKursow.views.test_view import test
 from platformaDoKursow.views.login_view import login_view, logout_view, registration_view, login_redirect
 from platformaDoKursow.views.course.course_view import CourseView
 from platformaDoKursow.views.course.course_edit_view import CourseEditView
@@ -16,12 +16,15 @@ from platformaDoKursow.views.chapter.create_chapter_view import CreateChapterVie
 from platformaDoKursow.views.chapter.remove_chapter_view import RemoveChapterView
 from platformaDoKursow.views.quiz.manage_quiz_view import ManageQuizView
 from platformaDoKursow.views.chapter.upload_image_view import custom_ckeditor_upload
+from platformaDoKursow.views.course.remove_user_from_course_view import RemoveUserFromCourseView
+from platformaDoKursow.views.quiz.solve_quiz_view import SolveQuizView
 from django.conf import settings
+from platformaDoKursow.views.quiz.quiz_attempts_view import QuizAttemptsView
 
 
 urlpatterns = [
     path('admin', admin.site.urls),
-    path('', test_view.test, name='home'),
+    path('', test, name='home'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register', registration_view, name='register'),
@@ -34,6 +37,7 @@ urlpatterns = [
     path('courses/<int:id>/generate_invitation_token', GenerateInvitationTokenView.as_view(), name='generate_invititation_token'),
     path('courses/join', JoinCourseView.as_view(), name='join_course'),
     path('courses/leave', LeaveCourseView.as_view(), name='leave_course'),
+    path('courses/<int:id>/remove_user_from_course', RemoveUserFromCourseView.as_view(), name='remove_user_from_course'),
 
     path('courses/<int:course_id>/chapters/create', CreateChapterView.as_view(), name='create_chapter'),
     path('courses/<int:course_id>/chapters/<int:id>', ChapterView.as_view(), name='chapter'),
@@ -42,7 +46,8 @@ urlpatterns = [
     path('courses/<int:course_id>/chapters/<int:chapter_id>/quiz', ManageQuizView.as_view(), name='manage_quiz'),
 
     path('course/<int:id>', ShowCourseView.as_view(), name='show_course'),
-
+    path('course/<int:course_id>/chapter/<int:chapter_id>/quiz', SolveQuizView.as_view(), name='solve_quiz'),
+    path('course/<int:course_id>/chapter/<int:chapter_id>/quiz_attempts', QuizAttemptsView.as_view(), name='quiz_attempts'),
 
     path('courses/<str:action>', CourseView.as_view(), name='other_courses'),
     path('ckeditor/upload/', custom_ckeditor_upload, name='ckeditor_upload'),
@@ -52,18 +57,8 @@ urlpatterns = [
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-### Chapters
-# add chapter
-# edit chapter
-# remove chapter
-## quiz
-# enable/disable quiz
-# add question
-# remove question
-# edit question
-
-### Completing course
-# enter course
-# select chapter
-# complete quiz
-# course progress
+# TODO
+# zegocloud, szkolenia - 6h
+# dodaj typ otwarty pytania z ai - 4h
+# razem ok 2dni robocze
+# frontend - 1-2 dni wiecej wywalone

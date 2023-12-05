@@ -9,6 +9,11 @@
 {{ course.course.name }}
 {{ course.created_at }}
 {{ course.progress }}
+<form method='POST' action="{% url 'leave_course' %}">
+    {% csrf_token %}
+    <input type='hidden' name='course_id' value={{ course.course_id }}>
+    <input type='submit' value='Leave course'>
+</form>
 </li>
 {% endfor %}
 </ol>

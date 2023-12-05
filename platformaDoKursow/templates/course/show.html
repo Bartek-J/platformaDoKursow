@@ -11,6 +11,10 @@ Descriptions: {{ course.descriptions }}
     <div class="rich-content">
         {{ chapter.content|safe }}
     </div>
+{% if chapter.quiz %}
+<a href="{% url 'quiz_attempts' course.id chapter.id %}">Chapter quiz</a>
+{% if chaper.quiz_id in passed_quizes %}<span>(Already passed)</span>{% endif %}
+{% endif %}
 {% endfor %}
 </ol>
 
