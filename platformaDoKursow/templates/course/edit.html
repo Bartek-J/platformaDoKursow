@@ -2,13 +2,40 @@
 
 {% block content %}
 
-<h2>Edit course</h2>
-<form method="post" action="{% url 'edit_course' course.pk %}">
-{% csrf_token %}
-{{ form.as_p }}
-<input type="hidden" name="_method" value="PUT">
-<button type="submit">Edit</button>
-</form>
-<a href="{% url 'course_details' course.pk %}">Go back</a>
+<div class="py-5">
+    <h2>Edit Course</h2>
+    <form method="post" action="{% url 'edit_course' course.pk %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Course Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ form.name.value }}" required>
+            {% if form.name.errors %}
+                <div class="invalid-feedback">
+                    {{ form.name.errors.as_text }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description">{{ form.description.value }}</textarea>
+            {% if form.description.errors %}
+                <div class="invalid-feedback">
+                    {{ form.description.errors.as_text }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="public" name="public" {% if form.public.value %}checked{% endif %}>
+            <label class="form-check-label" for="public">Public</label>
+        </div>
+
+        <input type="hidden" name="_method" value="PUT">
+        <button type="submit" class="btn btn-primary">Edit</button>
+    </form>
+    <a href="{% url 'course_details' course.pk %}" class="btn btn-secondary mt-2">Go Back</a>
+</div>
 
 {% endblock %}

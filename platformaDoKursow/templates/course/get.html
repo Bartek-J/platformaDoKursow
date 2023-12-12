@@ -2,22 +2,46 @@
 
 {% block content %}
 
-<h2>All publicly available courses.</h2>
-<ol>
-{% for course in courses %}
-<li>
-{{ course.name }}
-{{ course.created_at }}
-{{ course.creator.username }}
-</li>
-{% endfor %}
-</ol>
+<div class="py-5">
+    <h2 class="mb-3">All publicly available courses.</h2>
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Creator: {{ course.creator.username }}</h6>
+                    <p class="card-text">{{ course.description|default:"No description provided." }}</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Created on: {{ course.created_at|date:"Y-m-d" }}</small>
+                    {% if course.id in user_courses %}
+                    <a href="{% url 'show_course' course.id %}" class="btn btn-primary float-end">Show</a>
+                    {% else %}
+                    <a href="{% url 'join_new_course' course.id %}" class="btn btn-primary float-end">Join</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <p>No courses available.</p>
+        </div>
+        {% endfor %}
+    </div>
 
-<form method='POST' action="{% url 'join_course' %}">
-    Join course by invitation token:
-    {% csrf_token %}
-    <input type='text' name='invitation_token' required>
-    <input type='submit' value='Join'>
-</form>
+    <div class="mt-4 p-4 bg-light rounded">
+        <h4>Join a course by invitation token:</h4>
+        <form method='POST' action="{% url 'join_course' %}" class="row g-3">
+            {% csrf_token %}
+            <div class="col-auto">
+                <input type='text' name='invitation_token' class="form-control" placeholder="Invitation Token" required>
+            </div>
+            <div class="col-auto">
+                <button type='submit' class="btn btn-success mb-3">Join</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

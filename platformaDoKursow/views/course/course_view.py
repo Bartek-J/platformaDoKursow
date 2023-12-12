@@ -26,7 +26,9 @@ class CourseView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         return render(
             request, 'course/get.html',
-            {'courses': Course.objects.select_related('creator').filter(public=True)}
+            {'courses': Course.objects.select_related('creator').filter(public=True),
+             'user_courses': list(Participant.objects.filter(user=request.user).values_list('course_id', flat=True))
+            }
         )
 
     def delete(self, request: HttpRequest) -> HttpResponse:

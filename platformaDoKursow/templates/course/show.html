@@ -2,24 +2,38 @@
 
 {% block content %}
 
-Name: {{ course.name }}
-Descriptions: {{ course.descriptions }}
+<div class="py-5">
+    <h2>{{ course.name }}</h2>
+    <p>{{ course.description }}</p>
 
-<ol>
-{% for chapter in course.chapters.all %}
-<li>{{ chapter.title }}</li>
-    <div class="rich-content">
-        {{ chapter.content|safe }}
+    <div class="accordion" id="courseChapters">
+        {% for chapter in course.chapters.all %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                    Chapter {{ forloop.counter }}: {{ chapter.title }}
+                </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#courseChapters">
+                <div class="accordion-body rich-content">
+                    {{ chapter.content|safe }}
+                </div>
+                {% if chapter.quiz %}
+                <div class="accordion-footer d-flex justify-content-between align-items-center mt-2" style="padding: 20px">
+                    <a href="{% url 'quiz_attempts' course.id chapter.id %}" class="btn btn-primary">Chapter Quiz</a>
+                    {% if chapter.quiz.id in passed_quizes %}
+                        <span class="badge bg-success">Already passed</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
-{% if chapter.quiz %}
-<a href="{% url 'quiz_attempts' course.id chapter.id %}">Chapter quiz</a>
-{% if chaper.quiz_id in passed_quizes %}<span>(Already passed)</span>{% endif %}
-{% endif %}
-{% endfor %}
-</ol>
-
+</div>
 
 {% load static %}
 <script type="text/javascript" src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
 <script type="text/javascript" src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+
 {% endblock %}

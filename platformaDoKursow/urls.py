@@ -23,6 +23,7 @@ from platformaDoKursow.views.quiz.quiz_attempts_view import QuizAttemptsView
 from platformaDoKursow.views.training.training_view import TrainingView
 from platformaDoKursow.views.training.schedule_training_view import ScheduleTrainingView
 from platformaDoKursow.views.training.join_training_view import JoinTrainingView
+from platformaDoKursow.views.course.join_new_course_view import JoinNewCourseView
 
 
 urlpatterns = [
@@ -39,6 +40,7 @@ urlpatterns = [
     path('courses/<int:id>/edit', CourseEditView.as_view(), name='edit_course'),
     path('courses/<int:id>/generate_invitation_token', GenerateInvitationTokenView.as_view(), name='generate_invititation_token'),
     path('courses/join', JoinCourseView.as_view(), name='join_course'),
+    path('courses/join/<int:id>', JoinNewCourseView.as_view(), name='join_new_course'),
     path('courses/leave', LeaveCourseView.as_view(), name='leave_course'),
     path('courses/<int:id>/remove_user_from_course', RemoveUserFromCourseView.as_view(), name='remove_user_from_course'),
 
