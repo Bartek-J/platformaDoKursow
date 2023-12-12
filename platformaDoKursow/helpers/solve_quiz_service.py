@@ -1,7 +1,7 @@
 from django.db.models import QuerySet, Count, Prefetch
 from platformaDoKursow.models import Quiz, Question, Answer, QuizAttempt
 from platformaDoKursow.helpers.openai_service import ChatGPTService, ChatGPTServiceError
-
+from json import loads
 
 class SolveQuizServiceError(Exception): ...
 
@@ -22,7 +22,7 @@ class SolveQuizService:
             try:
                 question = all_questions[answered_question['question_id']]
                 if question.type == 'gpt_question':
-                    self.gpt_questions.append((question, answered_question['answer']))
+                    self.gpt_questions.append((question, answered_question['selected_answers']))
                     continue
                 points += self._check_percentage_of_succeed_question(
                     question, answered_question['selected_answers']) * question.points
@@ -64,14 +64,15 @@ class SolveQuizService:
     def _ask_gpt_to_check_if_question_is_correct(self) -> float:
         for _ in range(3):
             try:
-                return float(ChatGPTService(instruction=[
-                        '|'.join(f'''
+                data = ChatGPTService(instruction=
+                        '|'.join([f'''
                         question: {question[0].text},
                         answer_key:{question[0].answers.first()},
                         user_answer: {question[1]},
                         max_points: {question[0].points}
-                        ''' for question in self.gpt_questions)
-                    ]).run()[0]['points'])
+                        ''' for question in self.gpt_questions])
+                    ).run()
+                return float(loads(data[0])['points'])
             except (ChatGPTServiceError, TypeError, ValueError):
                 pass
 

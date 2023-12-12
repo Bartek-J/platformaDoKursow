@@ -2,208 +2,180 @@
 
 {% block content %}
 
-    <div class="container mt-5">
-        <h2>Tworzenie Quizu</h2>
-        <div id='errors'>
-
+<div class="container mt-5">
+    <h2>Tworzenie Quizu</h2>
+    <div id='errors'></div>
+    <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
+        {% csrf_token %}
+        <!-- Fields for Quiz model -->
+        <div class="form-group">
+            <label>Tytuł Quizu:</label>
+            <input type="text" class="form-control" name="quiz_title" required>
         </div>
-        <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
-            {% csrf_token %}
-            <!-- Pola dla modelu Quiz -->
-            <div class="form-group">
-                <label>Tytuł Quizu:</label>
-                <input type="text" class="form-control" name="quiz_title" required>
+        <div class="form-group">
+            <label>Opis Quizu:</label>
+            <textarea class="form-control" name="quiz_description"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Procent wymagany do zaliczenia quizu:</label>
+            <input type="number" class="form-control" name="percentage_required" required value="50" min="0" max="100">
+        </div>
+        <div class="form-group">
+            <label>Ilość możliwych podejść (ustaw 0 aby była nieograniczona)</label>
+            <input type="number" class="form-control" name="allowed_attempts" required value="1" min="0" max="100">
+        </div>
+        <!-- Questions will be added here -->
+        <div id="question-section"></div>
+        <input type="checkbox" id="gpt-question-checkbox"><label for="gpt-question-checkbox">Dodaj pytanie GPT</label>
+        <button type="button" class="btn btn-primary" id="add-question">Dodaj Pytanie</button>
+        <br><br>
+        <input type="button" id="save-quiz" class="btn btn-success" value="Zapisz Quiz2">
+    </form>
+</div>
+
+<!-- JavaScript Scripts -->
+<script>
+    document.getElementById('add-question').addEventListener('click', function() {
+        var questionSection = document.getElementById('question-section');
+        var questionCount = questionSection.children.length + 1;
+        var isGPTQuestion = document.getElementById('gpt-question-checkbox').checked;
+
+        // Creating a new question
+        var questionDiv = document.createElement('div');
+        questionDiv.classList.add('form-group', 'question-div');
+        questionDiv.id = 'question_div_' + questionCount;
+
+        // Question structure
+        questionDiv.innerHTML = `
+            <label>${isGPTQuestion ? 'Pytanie GPT' : 'Pytanie Tekstowe'} ${questionCount}:</label>
+            <input type="text" class="form-control question-text" name="question_${questionCount}_text" required>
+            <input type="number" class="form-control question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" ${isGPTQuestion ? '' : 'max="10"'} value="1">
+            <div class="answers" id="answers_${questionCount}">
+                ${isGPTQuestion ? '<input type="text" class="form-control answer-text" name="question_${questionCount}_answer_1_text" required><input type="checkbox" class="answer-correct" name="question_${questionCount}_answer_1_correct" checked hidden>' : ''}
             </div>
-            <div class="form-group">
-                <label>Opis Quizu:</label>
-                <textarea class="form-control" name="quiz_description"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Procent wymagany do zaliczenia quizu:</label>
-                <input type="number" class="form-control" name="percentage_required" required value="50" min="0" max="100">
-            </div>
-            <div class="form-group">
-                <label>Ilość możliwych podejść (ustaw 0 aby była nieograniczona)</label>
-                <input type="number" class="form-control" name="allowed_attempts" required value="1" min="0" max="100">
-            </div>
-            <!-- Tutaj będą dodawane pytania -->
-            <div id="question-section">
-            </div>
-            <button type="button" class="btn btn-primary" id="add-question">Dodaj Pytanie</button>
-            <br><br>
-            {% comment %} <input type="submit" class="btn btn-success" value="Zapisz Quiz"> {% endcomment %}
-            <input type="button" id="save-quiz" class="btn btn-success" value="Zapisz Quiz2">
+            ${!isGPTQuestion ? '<button type="button" class="btn btn-secondary add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>' : ''}
+            <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
+        `;
 
-        </form>
-    </div>
+        questionDiv.setAttribute('data-question-type', isGPTQuestion ? 'gpt_question' : 'text_question');
+        questionSection.appendChild(questionDiv);
 
-    <!-- Skrypty JavaScript -->
-    <script>
-        document.getElementById('add-question').addEventListener('click', function() {
-            var questionSection = document.getElementById('question-section');
-            var questionCount = questionSection.children.length + 1;
-
-            // Creating a new question
-            var questionDiv = document.createElement('div');
-            questionDiv.classList.add('form-group', 'question-div');
-
-            // Add checkbox for question type
-            var questionTypeDiv = document.createElement('div');
-            questionTypeDiv.innerHTML = `
-                <label for="question_type_${questionCount}">Typ Pytania:</label>
-                <select id="question_type_${questionCount}" class="form-control question-type" name="question_${questionCount}_type">
-                    <option value="text_question">Pytanie Tekstowe</option>
-                    <option value="gpt_question">Pytanie GPT</option>
-                </select>
-            `;
-            questionDiv.appendChild(questionTypeDiv);
-
-            questionDiv.innerHTML += `
-                <label>Pytanie ${questionCount}:</label>
-                <input type="text" class="form-control question-text" name="question_${questionCount}_text" required>
-                <input type="number" class="form-control question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" max="10", value="1">
-                <input type="checkbox" class="question-partial" name="question_${questionCount}_partial">
-                <label class="partial-label">Czy akceptowane częściowo?</label>
-                <div class="answers" id="answers_${questionCount}">
-                    <!-- Answers will be here -->
-                </div>
-                <button type="button" class="btn btn-secondary add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>
-                <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
-            `;
-            questionSection.appendChild(questionDiv);
-
-            // Handling the selection of question type
-            document.getElementById(`question_type_${questionCount}`).addEventListener('change', function() {
-                var selectedType = this.value;
-                var partialCheckbox = questionDiv.querySelector('.question-partial');
-                var partialLabel = questionDiv.querySelector('.partial-label');
-
-                if (selectedType === 'gpt_question') {
-                    partialCheckbox.checked = true;  // Automatically check and hide for GPT questions
-                    partialCheckbox.style.display = 'none';
-                    partialLabel.style.display = 'none';
-                } else {
-                    partialCheckbox.style.display = 'block';
-                    partialLabel.style.display = 'block';
-                }
-            });
-
-            // Handle removing a question
-            questionDiv.querySelector('.remove-question').addEventListener('click', function() {
-                this.parentElement.remove();
-            });
-
-            // Modify answer adding logic based on question type
-            questionDiv.getElementsByClassName('add-answer')[0].addEventListener('click', function(event) {
-                var questionNumber = event.target.getAttribute('data-question');
-                var questionType = document.getElementById('question_type_' + questionNumber).value;
-
-                if (questionType === 'gpt_question') {
-                    // For GPT questions, limit to one answer and mark as correct
-                    var answersDiv = document.getElementById('answers_' + questionNumber);
-                    if (answersDiv.children.length === 0) {
-                        addAnswer(answersDiv, questionNumber, true);
-                    }
-                } else {
-                    // For text questions, add answers normally
-                    var answersDiv = document.getElementById('answers_' + questionNumber);
-                    addAnswer(answersDiv, questionNumber, false);
-                }
-            });
-        });
-
-        function addAnswer(answersDiv, questionNumber, isGPTQuestion) {
-            var answerCount = answersDiv.children.length + 1;
-            var answerDiv = document.createElement('div');
-            answerDiv.classList.add('answer-div');
-            answerDiv.innerHTML = `
-                <input type="text" class="form-control answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
-                <input type="checkbox" class="answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct" ${isGPTQuestion ? 'checked' : ''} ${isGPTQuestion ? 'disabled' : ''}>
-                <label>Poprawna odpowiedź?</label>
-                ${!isGPTQuestion ? '<button type="button" class="btn btn-danger remove-answer">Usuń Odpowiedź</button>' : ''}
-            `;
-            answersDiv.appendChild(answerDiv);
-
-            // Handle removing an answer
-            answerDiv.querySelector('.remove-answer').addEventListener('click', function() {
-                this.parentElement.remove();
+        // Add event listener to add-answer button (for text questions)
+        if (!isGPTQuestion) {
+            questionDiv.querySelector('.add-answer').addEventListener('click', function() {
+                addAnswer(questionCount);
             });
         }
 
-        document.getElementById('save-quiz').addEventListener('click', function() {
-            var quizData = {
-                title: document.getElementsByName('quiz_title')[0].value,
-                description: document.getElementsByName('quiz_description')[0].value,
-                csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
-                percentage_required: document.getElementsByName('percentage_required')[0].value,
-                allowed_attempts: document.getElementsByName('allowed_attempts')[0].value,
-                questions: []
-            };
+        // Add event listener to remove-question button
+        questionDiv.querySelector('.remove-question').addEventListener('click', function() {
+            this.closest('.question-div').remove();
+        });
+    });
 
-            var questionSections = document.getElementById('question-section').children;
-            for (var i = 0; i < questionSections.length; i++) {
-                var questionType = questionSections[i].querySelector('.question-type').value;
-                var question = {
-                    text: questionSections[i].querySelector('[name^="question_"]').value,
-                    points: questionSections[i].querySelector('.question-points').value,
-                    partially_accepted: questionSections[i].querySelector('.question-partial').checked,
-                    question_type: questionType, // Add question type
-                    answers: []
-                };
+    function addAnswer(questionNumber) {
+        var answersDiv = document.getElementById('answers_' + questionNumber);
+        var answerCount = answersDiv.children.length + 1;
+        var answerDiv = document.createElement('div');
+        answerDiv.classList.add('answer-div');
+        answerDiv.innerHTML = `
+            <input type="text" class="form-control answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
+            <input type="checkbox" class="answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
+            <label>Poprawna odpowiedź?</label>
+            <button type="button" class="btn btn-danger remove-answer">Usuń Odpowiedź</button>
+        `;
 
-                var answersDivs = questionSections[i].getElementsByClassName('answer-div');
-                for (var j = 0; j < answersDivs.length; j++) {
-                    var answerText = answersDivs[j].querySelector('.answer-text').value;
-                    var answerCorrect = answersDivs[j].querySelector('.answer-correct').checked;
-                    question.answers.push({
+        answersDiv.appendChild(answerDiv);
+
+        // Handle removing an answer
+        answerDiv.querySelector('.remove-answer').addEventListener('click', function() {
+            this.parentElement.remove();
+        });
+    }
+
+    document.getElementById('save-quiz').addEventListener('click', function() {
+        var quizData = {
+            title: document.getElementsByName('quiz_title')[0].value,
+            description: document.getElementsByName('quiz_description')[0].value,
+            csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+            percentage_required: document.getElementsByName('percentage_required')[0].value,
+            allowed_attempts: document.getElementsByName('allowed_attempts')[0].value,
+            questions: []
+        };
+
+        var questionSections = document.getElementById('question-section').children;
+        for (var i = 0; i < questionSections.length; i++) {
+            var questionDiv = questionSections[i];
+            var questionType = questionDiv.getAttribute('data-question-type');
+            var questionText = questionDiv.querySelector('.question-text').value;
+            var questionPoints = questionDiv.querySelector('.question-points').value;
+            var partiallyAccepted = questionType === 'gpt_question';
+
+            var answers = [];
+            if (questionType === 'gpt_question') {
+                var answerText = questionDiv.querySelector('.answer-text').value;
+                answers.push({
+                    text: answerText,
+                    correct: true  // GPT question answers are always correct
+                });
+            } else {
+                // For text questions, gather all answers
+                var answerDivs = questionDiv.getElementsByClassName('answer-div');
+                for (var j = 0; j < answerDivs.length; j++) {
+                    var answerText = answerDivs[j].querySelector('.answer-text').value;
+                    var answerCorrect = answerDivs[j].querySelector('.answer-correct').checked;
+                    answers.push({
                         text: answerText,
                         correct: answerCorrect
                     });
                 }
-
-                quizData.questions.push(question);
             }
 
-            // Send quizData as JSON to the server using the fetch API
-            fetch(document.getElementById('myForm').action, {
-                method: 'POST',
-                headers: {
-                    "X-CSRFToken": getCookie("csrftoken"),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(quizData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                const response_data = data;
-                if (response_data.errors) {
-                    window.location.href = '#myForm';
-                    document.getElementById('errors').innerHTML = response_data.errors.join(', ');
-                } else {
-                    window.location.href = '/courses';
-                }
-
-                console.log(response_data);
-
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            quizData.questions.push({
+                text: questionText,
+                points: questionPoints,
+                partially_accepted: partiallyAccepted,
+                question_type: questionType,
+                answers: answers
             });
-        });
+        }
 
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+        fetch(document.getElementById('myForm').action, {
+            method: 'POST',
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(quizData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const response_data = data;
+            if (response_data.errors) {
+                window.location.href = '#myForm';
+                document.getElementById('errors').innerHTML = response_data.errors.join(', ');
+            } else {
+                window.location.href = '/courses';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
-    </script>
-    {% endblock %}
+        return cookieValue;
+    }
+</script>
+{% endblock %}

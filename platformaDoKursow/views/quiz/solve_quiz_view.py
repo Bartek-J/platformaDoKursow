@@ -1,6 +1,6 @@
 from django.views import View
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from platformaDoKursow.models import Course, Quiz, QuizAttempt
@@ -47,7 +47,7 @@ class SolveQuizView(View):
             )
         except (Quiz.DoesNotExist, Course.DoesNotExist):
             messages.error(request, 'Quiz not found.')
-            return redirect('show_course', course_id)
+            return JsonResponse(data={'errors': 'Chapter not found.'}, status=400)
 
         try:
             SolveQuizService(
@@ -55,6 +55,7 @@ class SolveQuizView(View):
             ).run()
         except SolveQuizServiceError as e:
             messages.error(request, str(e))
-            return redirect('show_course', course_id)
+            return JsonResponse(data={'errors': 'Chapter not found.'}, status=400)
 
-        return redirect('quiz_attempts', course_id, chapter_id)
+        messages.success(request, 'Quiz attempt was saved.')
+        return JsonResponse(data={'message': 'success'}, status=200)

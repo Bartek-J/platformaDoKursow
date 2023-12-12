@@ -9,64 +9,77 @@
 {% csrf_token %}
 <ol id='quiz'>
 {% for question in quiz.questions.all %}
-<li id='question_{{question.id}}'>
+<li id='question_{{ question.id }}' data-question-type="{{ question.type }}">
 {{ question.text }} ({{ question.points }} {% if question.points == 1 %}point{% else %}points{% endif %})
-<div class='form-group'><ul style='list-style-type:none;'>
-{% for answer in question.answers.all %}
-<li><input type='checkbox' value='{{ answer.id }}' name='answer_{{ answer.id }}'> {{answer.text}}</li>
-{% endfor %}
-</ul>
+<div class='form-group'>
+    {% if question.type == 'gpt_question' %}
+    <textarea name='answer_{{ question.id }}'></textarea>
+    {% else %}
+    <ul style='list-style-type:none;'>
+        {% for answer in question.answers.all %}
+        <li><input type='checkbox' value='{{ answer.id }}' name='answer_{{ question.id }}'> {{ answer.text }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 </div>
 </li>
 {% endfor %}
-
 </ol>
 <button type="submit">Submit</button>
 </form>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const form = document.getElementById('quizForm');
-      form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        const form = document.getElementById('quizForm');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
 
-        const formData = new FormData(form);
-        const questions = document.querySelectorAll('#quiz > li');
+            const questions = document.querySelectorAll('#quiz > li');
+            const requestData = Array.from(questions).map(question => {
+                const questionId = question.id.split('_')[1];
+                const questionType = question.getAttribute('data-question-type');
+                let selectedAnswers;
 
-        const requestData = Array.from(questions).map(question => {
-          const questionId = question.id.split('_')[1];
-          const inputs = question.querySelectorAll('input[type="checkbox"]:checked');
+                if (questionType === 'gpt_question') {
+                    const textarea = question.querySelector('textarea');
+                    selectedAnswers = textarea.value ? textarea.value : '';
+                } else {
+                    const inputs = question.querySelectorAll('input[type="checkbox"]:checked');
+                    selectedAnswers = Array.from(inputs).map(input => parseInt(input.value));
+                }
 
-          const selectedAnswers = Array.from(inputs).map(input => parseInt(input.value));
+                return {
+                    question_id: parseInt(questionId),
+                    selected_answers: selectedAnswers
+                };
+            });
 
-          return {
-            question_id: parseInt(questionId),
-            selected_answers: selectedAnswers
-          };
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken() // Function to get CSRF token
+                },
+                body: JSON.stringify(requestData)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Or handle the response according to your needs
+            }).then(data => {
+                // Handle the success. Redirect or show a message if needed.
+                window.location.href = '/courses';
+                console.log(data);
+            }).catch(error => {
+                // Handle the error
+                console.error('Error:', error);
+            });
         });
-
-        fetch(form.action, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': formData.get('csrfmiddlewaretoken') // Get the CSRF token from the form
-          },
-          body: JSON.stringify(requestData)
-        }).then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json(); // Or handle the response according to your needs
-        }).then(data => {
-          // Handle the success. Redirect or show a message if needed.
-          window.location.href = '/courses';
-          console.log(data);
-        }).catch(error => {
-          // Handle the error
-          console.error('Error:', error);
-        });
-      });
     });
-  </script>
+
+    function getCsrfToken() {
+        return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    }
+</script>
 
 {% endblock %}
