@@ -77,3 +77,4 @@ wcwidth
 yagmail
 django-bootstrap-v5
 django-ckeditor
+openai==0.27.8

@@ -1,5 +1,6 @@
 from django.db.models import QuerySet, Count, Prefetch
 from platformaDoKursow.models import Quiz, Question, Answer, QuizAttempt
+from platformaDoKursow.helpers.openai_service import ChatGPTService, ChatGPTServiceError
 
 
 class SolveQuizServiceError(Exception): ...
@@ -11,6 +12,7 @@ class SolveQuizService:
         self.request_data = request_data
         self.user = user
         self.course = course
+        self.gpt_questions = []
 
     def run(self) -> None:
         all_questions = self._get_all_quiz_questions()
@@ -19,10 +21,15 @@ class SolveQuizService:
         for answered_question in self.request_data:
             try:
                 question = all_questions[answered_question['question_id']]
+                if question.type == 'gpt_question':
+                    self.gpt_questions.append((question, answered_question['answer']))
+                    continue
                 points += self._check_percentage_of_succeed_question(
                     question, answered_question['selected_answers']) * question.points
             except KeyError:
                 raise SolveQuizServiceError('Wrong data was sent.')
+
+        points += self._ask_gpt_to_check_if_question_is_correct()
 
         quiz_attempt = QuizAttempt(
             user=self.user, quiz=self.quiz, course=self.course,
@@ -53,3 +60,19 @@ class SolveQuizService:
             question.pk: question
             for question in Question.objects.filter(quiz=self.quiz).prefetch_related('answers')
         }
+
+    def _ask_gpt_to_check_if_question_is_correct(self) -> float:
+        for _ in range(3):
+            try:
+                return float(ChatGPTService(instruction=[
+                        '|'.join(f'''
+                        question: {question[0].text},
+                        answer_key:{question[0].answers.first()},
+                        user_answer: {question[1]},
+                        max_points: {question[0].points}
+                        ''' for question in self.gpt_questions)
+                    ]).run()[0]['points'])
+            except (ChatGPTServiceError, TypeError, ValueError):
+                pass
+
+        raise SolveQuizServiceError('Error occured please try again later.')

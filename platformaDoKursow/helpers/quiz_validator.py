@@ -32,8 +32,8 @@ class QuizValidator:
 
         for question in self.request_data['questions']:
             at_least_one_correct = False
-            if len(question['answers']) < 2:
-                self.errors.add('Each question must have at least two answers.')
+            if len(question['answers']) < 1:
+                self.errors.add('Each question must have at least one answer.')
 
             if len(question['text']) < 10:
                 self.errors.add('Question cannot be shorter than 10 characters.')

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+your trainings:
+{% for training in your_scheduled_tranings %}
+{{ training.title }}
+{{ training.description }}
+{{ training.starting_time }}
+{{ training.duration }} min
+{% endfor %}
+ongoing trainings:
+{% for training in ongoing_trainings %}
+{{ training.title }}
+{{ training.description }}
+{{ training.starting_time }}
+{{ training.duration }} min
+<a href="{% url 'join_training' training.id %}">join</a>
+{% endfor %}
+incoming trainings:
+{% for training in incoming_training_sessions %}
+{{ training.title }}
+{{ training.description }}
+{{ training.starting_time }}
+{{ training.duration }} min
+{% endfor %}
+
+Schedule new training
+
+{% endblock %}

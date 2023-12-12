@@ -20,6 +20,9 @@ from platformaDoKursow.views.course.remove_user_from_course_view import RemoveUs
 from platformaDoKursow.views.quiz.solve_quiz_view import SolveQuizView
 from django.conf import settings
 from platformaDoKursow.views.quiz.quiz_attempts_view import QuizAttemptsView
+from platformaDoKursow.views.training.training_view import TrainingView
+from platformaDoKursow.views.training.schedule_training_view import ScheduleTrainingView
+from platformaDoKursow.views.training.join_training_view import JoinTrainingView
 
 
 urlpatterns = [
@@ -52,6 +55,11 @@ urlpatterns = [
     path('courses/<str:action>', CourseView.as_view(), name='other_courses'),
     path('ckeditor/upload/', custom_ckeditor_upload, name='ckeditor_upload'),
     path('ckeditor/', include('ckeditor_uploader.urls')),
+
+    path('trainings', TrainingView.as_view(), name='trainings'),
+    path('trainings/new', ScheduleTrainingView.as_view(), name='schedule_training'),
+    path('trainings/<int:id>/join', JoinTrainingView.as_view(), name='join_training'),
+
 ]
 
 

@@ -49,6 +49,8 @@ class Question(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+
+
 class Answer(models.Model):
     class Meta:
         db_table = 'answers'
@@ -58,6 +60,9 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.text
 
 
 class Participant(models.Model):
@@ -83,3 +88,17 @@ class QuizAttempt(models.Model):
     quiz_passed = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class ScheduledTraining(models.Model):
+    class Meta:
+        db_table = 'scheduled_trainings'
+
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    time_duration = models.FloatField(default=30)
+    starting_time = models.DateTimeField()
+    ending_time = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
