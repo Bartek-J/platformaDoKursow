@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
 <div class="py-5">
     <h2>{{ course.name }}</h2>
     <p>{{ course.description }}</p>
@@ -12,6 +12,11 @@
             <h2 class="accordion-header" id="heading{{ forloop.counter }}">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
                     Chapter {{ forloop.counter }}: {{ chapter.title }}
+                    {% if chapter.quiz.id in passed_quizes %}
+                    <span class="badge bg-success ms-1">
+                        <i class="fas fa-check text-white"></i>
+                    </span>
+                {% endif %}
                 </button>
             </h2>
             <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#courseChapters">

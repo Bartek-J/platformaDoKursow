@@ -2,29 +2,53 @@
 
 {% block content %}
 
-your trainings:
-{% for training in your_scheduled_tranings %}
-{{ training.title }}
-{{ training.description }}
-{{ training.starting_time }}
-{{ training.duration }} min
-{% endfor %}
-ongoing trainings:
-{% for training in ongoing_trainings %}
-{{ training.title }}
-{{ training.description }}
-{{ training.starting_time }}
-{{ training.duration }} min
-<a href="{% url 'join_training' training.id %}">join</a>
-{% endfor %}
-incoming trainings:
-{% for training in incoming_training_sessions %}
-{{ training.title }}
-{{ training.description }}
-{{ training.starting_time }}
-{{ training.duration }} min
-{% endfor %}
+<div class="container mt-4">
+    <h2 class="mb-3">Your Trainings</h2>
+    {% for training in your_scheduled_trainings %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <h5 class="card-title">{{ training.title }}</h5>
+            <p class="card-text">{{ training.description }}</p>
+            <p class="card-text">Starting Time: {{ training.starting_time }}</p>
+            <p class="card-text">Duration: {{ training.duration }} min</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>You have no scheduled trainings.</p>
+    {% endfor %}
 
-Schedule new training
+    <h2 class="mb-3 mt-4">Ongoing Trainings</h2>
+    {% for training in ongoing_trainings %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <h5 class="card-title">{{ training.title }}</h5>
+            <p class="card-text">{{ training.description }}</p>
+            <p class="card-text">Starting Time: {{ training.starting_time }}</p>
+            <p class="card-text">Duration: {{ training.duration }} min</p>
+            <a href="{% url 'join_training' training.id %}" class="btn btn-primary">Join</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>There are no ongoing trainings at the moment.</p>
+    {% endfor %}
+
+    <h2 class="mb-3 mt-4">Incoming Trainings</h2>
+    {% for training in incoming_training_sessions %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <h5 class="card-title">{{ training.title }}</h5>
+            <p class="card-text">{{ training.description }}</p>
+            <p class="card-text">Starting Time: {{ training.starting_time }}</p>
+            <p class="card-text">Duration: {{ training.duration }} min</p>
+        </div>
+    </div>
+    {% empty %}
+    <p>There are no incoming training sessions scheduled.</p>
+    {% endfor %}
+</div>
+
+<div class=" mt-5">
+    <a href="{% url 'schedule_training' %}" class="btn btn-success">Schedule New Training</a>
+</div>
 
 {% endblock %}

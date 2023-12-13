@@ -1,32 +1,44 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% load custom_tags %}
+<div class="py-5">
+    <h2>{{ chapter.name }}</h2>
+    <h3>Quiz: {{ chapter.quiz.title }}</h3>
+    {% if quiz_passed %}
+        <span class="badge bg-success">Quiz Passed</span>
+    {% endif %}
+    <p>{{ chapter.quiz.description }}</p>
+    {% if chapter.quiz.allowed_attempts %}
+        <p>Max attempts: {{ chapter.quiz.allowed_attempts }}</p>
+    {% endif %}
+    <p>Percentage required to pass: {{ chapter.quiz.percentage_required|multiply:100 }}%</p>
 
-Name: {{ chapter.name }}
-Quiz: {{ chapter.quiz.title }}
-{% if quiz_passed %}<span>Quiz passed</span>{% endif %}
-{{ chapter.quiz.description }}
-{% if chapter.quiz.allowed_attempts %}Max attempts: {{chapter.quiz.allowed_attempts}}{% endif %}
-Percentage required: {{chapter.quiz.percentage_required}}
-{% if quiz_attempts %}
-<table>
-    <tr>
-        <td>Number</td>
-        <td>Points</td>
-    </tr>
-{% for quiz_attempt in quiz_attempts %}
-<tr>
-    <td>{{ forloop.counter }}</td>
-    <td>{{quiz_attempt.points}}{{quiz_attempt.percentage}}</td>
-</tr>
-{% endfor %}
-</table>
-{% endif %}
+    {% if quiz_attempts %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Attempt Number</th>
+                    <th scope="col">Points</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for quiz_attempt in quiz_attempts %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ quiz_attempt.points }} ({{ quiz_attempt.percentage|multiply:100 }}%)</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
 
-{% if not quiz_passed %}
-<a href="{% url 'solve_quiz' course_id chapter_id %}">Attempt to solve</a>
-{% endif %}
-<a href="{% url 'show_course' course_id %}">Back</a>
-
+    <div class="mt-3">
+        {% if not quiz_passed %}
+            <a href="{% url 'solve_quiz' course_id chapter_id %}" class="btn btn-primary">Attempt to Solve</a>
+        {% endif %}
+        <a href="{% url 'show_course' course_id %}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
 
 {% endblock %}

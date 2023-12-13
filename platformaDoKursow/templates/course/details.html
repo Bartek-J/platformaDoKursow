@@ -25,10 +25,10 @@
                 <ul class="list-group mt-2">
                     {% for participant in course.participants.all %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ participant.user.name }}
+                        {{ participant.user.username }}
                         <div>
-                            <span class="badge bg-primary rounded-pill">{{ participant.progress }}%</span>
-                            <form method='POST' action="{% url 'remove_user_from_course' %}" class="d-inline">
+                            <span class="badge bg-primary rounded-pill">Progress: {{ participant.progress }}%</span>
+                            <form method='POST' action="{% url 'remove_user_from_course' course.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <input type='hidden' value='{{ participant.id }}' name='user_id'>
                                 <button type='submit' class="btn btn-danger btn-sm">Remove</button>

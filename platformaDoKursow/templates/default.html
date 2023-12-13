@@ -2,10 +2,83 @@
 
 {% block content %}
 
-<ul>
-    <li>Twoje kursy</li>
-    <li>Szukaj kursów</li>
-    <li>Ustawienia</li>
-</ul>
+<div class="container mt-5">
+    <!-- Hero Section -->
+    <section class="text-center">
+        <h1 class="display-4">Welcome to Our Learning Platform</h1>
+        <p class="lead">Expand your knowledge and skills with a variety of courses designed for interactive learning.</p>
+        <a href="{% url 'courses' %}" class="btn btn-primary btn-lg">Browse Courses</a>
+    </section>
+
+    <!-- Featured Courses -->
+    <section class="mt-5">
+        <h2 class="mb-3">Featured Courses</h2>
+        <div class="row">
+            <!-- Dummy data for the loop, replace with actual data -->
+            {% for course in featured_courses %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="{{ course.image_url }}" class="card-img-top" alt="{{ course.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.name }}</h5>
+                        <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                        <a href="{% url 'course_details' course.id %}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="mt-5">
+        <h2 class="mb-3">How It Works</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <h3 class="h5">Choose Your Course</h3>
+                <p>Explore our diverse course catalog and enroll in the course that suits your needs and schedule.</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="h5">Learn at Your Pace</h3>
+                <p>Take advantage of self-paced learning with access to engaging resources and expert instructors.</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="h5">Achieve Your Goals</h3>
+                <p>Complete courses and gain the skills and certificates to advance your career or pursue new opportunities.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="mt-5">
+        <h2 class="mb-3">What Our Students Say</h2>
+        <div id="carouselTestimonials" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for testimonial in testimonials %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <blockquote class="blockquote">
+                        <p class="mb-0">{{ testimonial.quote }}</p>
+                        <footer class="blockquote-footer">{{ testimonial.author }}</footer>
+                    </blockquote>
+                </div>
+                {% endfor %}
+            </div>
+            <a class="carousel-control-prev" href="#carouselTestimonials" role="button" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselTestimonials" role="button" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="text-center mt-5 mb-5">
+        <h2 class="mb-3">Ready to Start Learning?</h2>
+        <a href="{% url 'register' %}" class="btn btn-success btn-lg">Sign Up Today</a>
+    </section>
+</div>
 
 {% endblock %}

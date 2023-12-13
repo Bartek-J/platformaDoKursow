@@ -62,6 +62,7 @@ class SolveQuizService:
         }
 
     def _ask_gpt_to_check_if_question_is_correct(self) -> float:
+        if not self.gpt_questions: return 0
         for _ in range(3):
             try:
                 data = ChatGPTService(instruction=
@@ -73,7 +74,7 @@ class SolveQuizService:
                         ''' for question in self.gpt_questions])
                     ).run()
                 return float(loads(data[0])['points'])
-            except (ChatGPTServiceError, TypeError, ValueError):
+            except (ChatGPTServiceError, TypeError, ValueError, KeyError):
                 pass
 
         raise SolveQuizServiceError('Error occured please try again later.')

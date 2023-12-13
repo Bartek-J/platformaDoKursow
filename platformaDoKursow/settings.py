@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'platformaDoKursow.templatetags',
     'bootstrap5',
     'platformaDoKursow',
     'django.contrib.admin',
@@ -133,6 +134,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_JQUERY_URL = '//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'
+
 CKEDITOR_RESTRICT_BY_USER = True
 OPENAI_API_KEY = "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"
 
@@ -149,7 +151,7 @@ CKEDITOR_CONFIGS = {
             ['CodeSnippet'],
             ['Mathjax']
         ],
-            'width': '100%',
+            'width': 'full',
             'extraPlugins': ','.join([
                 'codesnippet', 'mathjax'
             ]),
