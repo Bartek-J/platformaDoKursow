@@ -4,32 +4,34 @@
 
 <div class="container mt-5">
     <h2>Tworzenie Quizu</h2>
-    <div id='errors'></div>
+    <div id='errors' class="alert alert-danger d-none" role="alert"></div>
     <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
         {% csrf_token %}
         <!-- Fields for Quiz model -->
-        <div class="form-group">
-            <label>Tytuł Quizu:</label>
-            <input type="text" class="form-control" name="quiz_title" required>
+        <div class="form-group mb-3">
+            <label for="quiz_title" class="form-label">Tytuł Quizu:</label>
+            <input type="text" class="form-control" id="quiz_title" name="quiz_title" required>
         </div>
-        <div class="form-group">
-            <label>Opis Quizu:</label>
-            <textarea class="form-control" name="quiz_description"></textarea>
+        <div class="form-group mb-3">
+            <label for="quiz_description" class="form-label">Opis Quizu:</label>
+            <textarea class="form-control" id="quiz_description" name="quiz_description"></textarea>
         </div>
-        <div class="form-group">
-            <label>Procent wymagany do zaliczenia quizu:</label>
-            <input type="number" class="form-control" name="percentage_required" required value="50" min="0" max="100">
+        <div class="form-group mb-3">
+            <label for="percentage_required" class="form-label">Procent wymagany do zaliczenia quizu:</label>
+            <input type="number" class="form-control" id="percentage_required" name="percentage_required" required value="50" min="0" max="100">
         </div>
-        <div class="form-group">
-            <label>Ilość możliwych podejść (ustaw 0 aby była nieograniczona)</label>
-            <input type="number" class="form-control" name="allowed_attempts" required value="1" min="0" max="100">
+        <div class="form-group mb-3">
+            <label for="allowed_attempts" class="form-label">Ilość możliwych podejść (ustaw 0 aby była nieograniczona):</label>
+            <input type="number" class="form-control" id="allowed_attempts" name="allowed_attempts" required value="1" min="0" max="100">
         </div>
         <!-- Questions will be added here -->
-        <div id="question-section"></div>
-        <input type="checkbox" id="gpt-question-checkbox"><label for="gpt-question-checkbox">Dodaj pytanie GPT</label>
-        <button type="button" class="btn btn-primary" id="add-question">Dodaj Pytanie</button>
-        <br><br>
-        <input type="button" id="save-quiz" class="btn btn-success" value="Zapisz Quiz2">
+        <div id="question-section" class="mb-3"></div>
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="gpt-question-checkbox">
+            <label class="form-check-label" for="gpt-question-checkbox">Dodaj pytanie GPT</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-3" id="add-question">Dodaj Pytanie</button>
+        <button type="button" id="save-quiz" class="btn btn-success">Zapisz Quiz</button>
     </form>
 </div>
 
@@ -42,18 +44,18 @@
 
         // Creating a new question
         var questionDiv = document.createElement('div');
-        questionDiv.classList.add('form-group', 'question-div');
+        questionDiv.classList.add('form-group', 'question-div', 'mb-3');
         questionDiv.id = 'question_div_' + questionCount;
 
         // Question structure
         questionDiv.innerHTML = `
-            <label>${isGPTQuestion ? 'Pytanie GPT' : 'Pytanie Tekstowe'} ${questionCount}:</label>
-            <input type="text" class="form-control question-text" name="question_${questionCount}_text" required>
-            <input type="number" class="form-control question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" ${isGPTQuestion ? '' : 'max="10"'} value="1">
-            <div class="answers" id="answers_${questionCount}">
-                ${isGPTQuestion ? '<input type="text" class="form-control answer-text" name="question_${questionCount}_answer_1_text" required><input type="checkbox" class="answer-correct" name="question_${questionCount}_answer_1_correct" checked hidden>' : ''}
+            <label class="form-label">${isGPTQuestion ? 'Pytanie GPT' : 'Pytanie Tekstowe'} ${questionCount}:</label>
+            <input type="text" class="form-control mb-2 question-text" name="question_${questionCount}_text" required>
+            <input type="number" class="form-control mb-2 question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" ${isGPTQuestion ? '' : 'max="10"'} value="1">
+            <div class="answers mb-2" id="answers_${questionCount}">
+                ${isGPTQuestion ? '<input type="text" class="form-control mb-2 answer-text" name="question_${questionCount}_answer_1_text" required><input type="checkbox" class="answer-correct d-none" name="question_${questionCount}_answer_1_correct" checked>' : ''}
             </div>
-            ${!isGPTQuestion ? '<button type="button" class="btn btn-secondary add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>' : ''}
+            ${!isGPTQuestion ? '<button type="button" class="btn btn-secondary mb-2 add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>' : ''}
             <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
         `;
 
@@ -77,11 +79,11 @@
         var answersDiv = document.getElementById('answers_' + questionNumber);
         var answerCount = answersDiv.children.length + 1;
         var answerDiv = document.createElement('div');
-        answerDiv.classList.add('answer-div');
+        answerDiv.classList.add('answer-div', 'mb-2');
         answerDiv.innerHTML = `
-            <input type="text" class="form-control answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
-            <input type="checkbox" class="answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
-            <label>Poprawna odpowiedź?</label>
+            <input type="text" class="form-control mb-2 answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
+            <input type="checkbox" class="form-check-input answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
+            <label class="form-check-label">Poprawna odpowiedź?</label>
             <button type="button" class="btn btn-danger remove-answer">Usuń Odpowiedź</button>
         `;
 
@@ -116,10 +118,9 @@
                 var answerText = questionDiv.querySelector('.answer-text').value;
                 answers.push({
                     text: answerText,
-                    correct: true  // GPT question answers are always correct
+                    correct: true
                 });
             } else {
-                // For text questions, gather all answers
                 var answerDivs = questionDiv.getElementsByClassName('answer-div');
                 for (var j = 0; j < answerDivs.length; j++) {
                     var answerText = answerDivs[j].querySelector('.answer-text').value;
@@ -140,6 +141,7 @@
             });
         }
 
+        // AJAX request to save the quiz
         fetch(document.getElementById('myForm').action, {
             method: 'POST',
             headers: {
@@ -152,7 +154,7 @@
         .then(data => {
             const response_data = data;
             if (response_data.errors) {
-                window.location.href = '#myForm';
+                document.getElementById('errors').classList.remove('d-none');
                 document.getElementById('errors').innerHTML = response_data.errors.join(', ');
             } else {
                 window.location.href = '/courses';
@@ -178,4 +180,5 @@
         return cookieValue;
     }
 </script>
+
 {% endblock %}
