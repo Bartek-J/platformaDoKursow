@@ -61,14 +61,6 @@ urlpatterns = [
     path('trainings', TrainingView.as_view(), name='trainings'),
     path('trainings/new', ScheduleTrainingView.as_view(), name='schedule_training'),
     path('trainings/<int:id>/join', JoinTrainingView.as_view(), name='join_training'),
-
 ]
 
-
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# TODO
-# zegocloud, szkolenia - 6h
-# dodaj typ otwarty pytania z ai - 4h
-# razem ok 2dni robocze
-# frontend - 1-2 dni wiecej wywalone

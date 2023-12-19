@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from platformaDoKursow.forms.login_form import LoginForm, RegistrationForm
-from django.contrib.auth.decorators import login_required
 from platformaDoKursow.helpers.allowed_methods_decorator import allowed_methods
+from platformaDoKursow.forms.login_form import LoginForm, RegistrationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 @allowed_methods('GET,POST')
 def login_view(request):
@@ -17,7 +17,7 @@ def login_view(request):
                 login(request, user)
                 return redirect('courses')
             else:
-                messages.error(request, 'Nieprawidłowe dane logowania.')
+                messages.error(request, 'Invalid login params.')
     else:
         form = LoginForm()
 

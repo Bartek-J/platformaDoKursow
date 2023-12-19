@@ -1,184 +1,299 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <div class="container mt-5">
-    <h2>Tworzenie Quizu</h2>
-    <div id='errors' class="alert alert-danger d-none" role="alert"></div>
-    <form method="post" action="{% url 'manage_quiz' chapter.course_id chapter.id %}" id='myForm'>
-        {% csrf_token %}
-        <!-- Fields for Quiz model -->
-        <div class="form-group mb-3">
-            <label for="quiz_title" class="form-label">Tytuł Quizu:</label>
-            <input type="text" class="form-control" id="quiz_title" name="quiz_title" required>
-        </div>
-        <div class="form-group mb-3">
-            <label for="quiz_description" class="form-label">Opis Quizu:</label>
-            <textarea class="form-control" id="quiz_description" name="quiz_description"></textarea>
-        </div>
-        <div class="form-group mb-3">
-            <label for="percentage_required" class="form-label">Procent wymagany do zaliczenia quizu:</label>
-            <input type="number" class="form-control" id="percentage_required" name="percentage_required" required value="50" min="0" max="100">
-        </div>
-        <div class="form-group mb-3">
-            <label for="allowed_attempts" class="form-label">Ilość możliwych podejść (ustaw 0 aby była nieograniczona):</label>
-            <input type="number" class="form-control" id="allowed_attempts" name="allowed_attempts" required value="1" min="0" max="100">
-        </div>
-        <!-- Questions will be added here -->
-        <div id="question-section" class="mb-3"></div>
-        <div class="form-check mb-3">
-            <input type="checkbox" class="form-check-input" id="gpt-question-checkbox">
-            <label class="form-check-label" for="gpt-question-checkbox">Dodaj pytanie GPT</label>
-        </div>
-        <button type="button" class="btn btn-primary mb-3" id="add-question">Dodaj Pytanie</button>
-        <button type="button" id="save-quiz" class="btn btn-success">Zapisz Quiz</button>
-    </form>
+  <h2>Quiz Creator for chapter: "{{chapter.title}}"</h2>
+  <div id="errors" class="alert alert-danger d-none" role="alert"></div>
+  <form
+    method="post"
+    action="{% url 'manage_quiz' chapter.course_id chapter.id %}"
+    id="myForm"
+  >
+    {% csrf_token %}
+    <!-- Fields for Quiz model -->
+    <div class="form-group mb-3">
+      <label for="quiz_title" class="form-label">Quiz title:</label>
+      <input
+        type="text"
+        class="form-control"
+        id="quiz_title"
+        name="quiz_title"
+        required
+      />
+    </div>
+    <div class="form-group mb-3">
+      <label for="quiz_description" class="form-label">Quiz description:</label>
+      <textarea
+        class="form-control"
+        id="quiz_description"
+        name="quiz_description"
+      ></textarea>
+    </div>
+    <div class="form-group mb-3">
+      <label for="percentage_required" class="form-label"
+        >Percentage required to pass quiz:</label
+      >
+      <input
+        type="number"
+        class="form-control"
+        id="percentage_required"
+        name="percentage_required"
+        required
+        value="50"
+        min="0"
+        max="100"
+      />
+    </div>
+    <div class="form-group mb-3">
+      <label for="allowed_attempts" class="form-label"
+        >Allowed attempts number (set to 0 to allow infinite):</label
+      >
+      <input
+        type="number"
+        class="form-control"
+        id="allowed_attempts"
+        name="allowed_attempts"
+        required
+        value="0"
+        min="0"
+        max="100"
+      />
+    </div>
+    <!-- Questions will be added here -->
+    <hr />
+    <h4>Questions</h4>
+    <div id="question-section" class="mb-3"></div>
+    <hr />
+    <div class="form-check mb-3">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="gpt-question-checkbox"
+      />
+      <label class="form-check-label" for="gpt-question-checkbox"
+        >Open-ended question?</label
+      >
+    </div>
+    <button type="button" class="btn btn-primary mb-3" id="add-question">
+      Add question
+    </button>
+    <hr />
+    <button type="button" id="save-quiz" class="btn btn-success">
+      Save Quiz
+    </button>
+  </form>
 </div>
 
 <!-- JavaScript Scripts -->
 <script>
-    document.getElementById('add-question').addEventListener('click', function() {
-        var questionSection = document.getElementById('question-section');
-        var questionCount = questionSection.children.length + 1;
-        var isGPTQuestion = document.getElementById('gpt-question-checkbox').checked;
+  document
+    .getElementById("add-question")
+    .addEventListener("click", function () {
+      var questionSection = document.getElementById("question-section");
+      var questionCount = questionSection.children.length + 1;
+      var isGPTQuestion = document.getElementById(
+        "gpt-question-checkbox"
+      ).checked;
 
-        // Creating a new question
-        var questionDiv = document.createElement('div');
-        questionDiv.classList.add('form-group', 'question-div', 'mb-3');
-        questionDiv.id = 'question_div_' + questionCount;
+      // Creating a new question
+      var questionDiv = document.createElement("div");
+      questionDiv.classList.add("form-group", "question-div", "mb-3");
+      questionDiv.id = "question_div_" + questionCount;
 
-        // Question structure
-        questionDiv.innerHTML = `
-            <label class="form-label">${isGPTQuestion ? 'Pytanie GPT' : 'Pytanie Tekstowe'} ${questionCount}:</label>
-            <input type="text" class="form-control mb-2 question-text" name="question_${questionCount}_text" required>
-            <input type="number" class="form-control mb-2 question-points" name="question_${questionCount}_points" placeholder="Punkty za pytanie" required min="1" ${isGPTQuestion ? '' : 'max="10"'} value="1">
-            <div class="answers mb-2" id="answers_${questionCount}">
-                ${isGPTQuestion ? '<input type="text" class="form-control mb-2 answer-text" name="question_${questionCount}_answer_1_text" required><input type="checkbox" class="answer-correct d-none" name="question_${questionCount}_answer_1_correct" checked>' : ''}
+      // Question structure
+      questionDiv.innerHTML = `
+        <div class="form-group row mb-1">
+            <label class="col-sm-2 col-form-label">${
+              isGPTQuestion ? "Open-ended question" : "Closed-ended question"
+            } ${questionCount}:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control question-text" name="question_${questionCount}_text" placeholder="${
+        isGPTQuestion ? "Question text" : "Question text"
+      }" required>
             </div>
-            ${!isGPTQuestion ? '<button type="button" class="btn btn-secondary mb-2 add-answer" data-question="${questionCount}">Dodaj Odpowiedź</button>' : ''}
-            <button type="button" class="btn btn-danger remove-question" data-question="${questionCount}">Usuń Pytanie</button>
-        `;
-
-        questionDiv.setAttribute('data-question-type', isGPTQuestion ? 'gpt_question' : 'text_question');
-        questionSection.appendChild(questionDiv);
-
-        // Add event listener to add-answer button (for text questions)
-        if (!isGPTQuestion) {
-            questionDiv.querySelector('.add-answer').addEventListener('click', function() {
-                addAnswer(questionCount);
-            });
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-2 col-form-label">Points for question:</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control question-points" name="question_${questionCount}_points" placeholder="Points" required min="1" ${
+        isGPTQuestion ? "" : 'max="10"'
+      } value="1">
+            </div>
+        </div>
+        ${
+          isGPTQuestion
+            ? `
+            <div class="form-group row mb-1">
+                <label class="col-sm-2 col-form-label">Answer key:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control answer-text" name="question_${questionCount}_answer_1_text" required>
+                </div>
+            </div>
+        `
+            : ""
         }
+        <div class="form-group row mb-1">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-10 mb-2">
+                ${
+                  !isGPTQuestion
+                    ? '<button type="button" class="btn btn-outline-secondary add-answer" data-question="${questionCount}">Add Answer</button>'
+                    : ""
+                }
+                <button type="button" class="btn btn-outline-danger remove-question" data-question="${questionCount}">Remove Question</button>
+            </div>
+        </div>
+    `;
 
-        // Add event listener to remove-question button
-        questionDiv.querySelector('.remove-question').addEventListener('click', function() {
-            this.closest('.question-div').remove();
+      questionDiv.setAttribute(
+        "data-question-type",
+        isGPTQuestion ? "gpt_question" : "text_question"
+      );
+      questionSection.appendChild(questionDiv);
+
+      // Add event listener to add-answer button (for text questions)
+      if (!isGPTQuestion) {
+        questionDiv
+          .querySelector(".add-answer")
+          .addEventListener("click", function () {
+            addAnswer(questionCount);
+          });
+      }
+
+      // Add event listener to remove-question button
+      questionDiv
+        .querySelector(".remove-question")
+        .addEventListener("click", function () {
+          this.closest(".question-div").remove();
         });
     });
 
-    function addAnswer(questionNumber) {
-        var answersDiv = document.getElementById('answers_' + questionNumber);
-        var answerCount = answersDiv.children.length + 1;
-        var answerDiv = document.createElement('div');
-        answerDiv.classList.add('answer-div', 'mb-2');
-        answerDiv.innerHTML = `
-            <input type="text" class="form-control mb-2 answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
-            <input type="checkbox" class="form-check-input answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
-            <label class="form-check-label">Poprawna odpowiedź?</label>
-            <button type="button" class="btn btn-danger remove-answer">Usuń Odpowiedź</button>
+  function addAnswer(questionNumber) {
+    var answersDiv = document.getElementById(`answers_${questionNumber}`);
+    if (!answersDiv) {
+      // Create a container for answers if it doesn't exist
+      answersDiv = document.createElement("div");
+      answersDiv.id = `answers_${questionNumber}`;
+      var questionDiv = document.getElementById(
+        `question_div_${questionNumber}`
+      );
+      questionDiv.appendChild(answersDiv);
+    }
+
+    var answerCount = answersDiv.children.length + 1;
+    var answerDiv = document.createElement("div");
+    answerDiv.classList.add("form-group", "row", "mb-1", "answer-div");
+    answerDiv.innerHTML = `
+
+            <label class="col-sm-2 col-form-label">Answer ${answerCount}:</label>
+            <div class="col-sm-8 content1">
+                <input type="text" class="form-control mb-2 answer-text" name="question_${questionNumber}_answer_${answerCount}_text" required>
+            </div>
+
+            <div class='content2'>
+                <input type="checkbox" class="answer-correct" name="question_${questionNumber}_answer_${answerCount}_correct">
+                <label class="col-sm-2 col-form-label" for="question_${questionNumber}_answer_${answerCount}_correct">Is correct?</label>
+                <button type="button" class="btn btn-danger remove-answer">Remove answer</button>
+            </div>
         `;
 
-        answersDiv.appendChild(answerDiv);
+    answersDiv.appendChild(answerDiv);
 
-        // Handle removing an answer
-        answerDiv.querySelector('.remove-answer').addEventListener('click', function() {
-            this.parentElement.remove();
+    // Handle removing an answer
+    answerDiv
+      .querySelector(".remove-answer")
+      .addEventListener("click", function () {
+        answerDiv.remove();
+      });
+  }
+
+  document.getElementById("save-quiz").addEventListener("click", function () {
+    var quizData = {
+      title: document.getElementsByName("quiz_title")[0].value,
+      description: document.getElementsByName("quiz_description")[0].value,
+      csrfmiddlewaretoken: document.getElementsByName("csrfmiddlewaretoken")[0]
+        .value,
+      percentage_required: document.getElementsByName("percentage_required")[0]
+        .value,
+      allowed_attempts: document.getElementsByName("allowed_attempts")[0].value,
+      questions: [],
+    };
+
+    var questionSections = document.getElementById("question-section").children;
+    for (var i = 0; i < questionSections.length; i++) {
+      var questionDiv = questionSections[i];
+      var questionType = questionDiv.getAttribute("data-question-type");
+      var questionText = questionDiv.querySelector(".question-text").value;
+      var questionPoints = questionDiv.querySelector(".question-points").value;
+      var partiallyAccepted = questionType === "gpt_question";
+
+      var answers = [];
+      if (questionType === "gpt_question") {
+        var answerText = questionDiv.querySelector(".answer-text").value;
+        answers.push({
+          text: answerText,
+          correct: true,
         });
-    }
-
-    document.getElementById('save-quiz').addEventListener('click', function() {
-        var quizData = {
-            title: document.getElementsByName('quiz_title')[0].value,
-            description: document.getElementsByName('quiz_description')[0].value,
-            csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
-            percentage_required: document.getElementsByName('percentage_required')[0].value,
-            allowed_attempts: document.getElementsByName('allowed_attempts')[0].value,
-            questions: []
-        };
-
-        var questionSections = document.getElementById('question-section').children;
-        for (var i = 0; i < questionSections.length; i++) {
-            var questionDiv = questionSections[i];
-            var questionType = questionDiv.getAttribute('data-question-type');
-            var questionText = questionDiv.querySelector('.question-text').value;
-            var questionPoints = questionDiv.querySelector('.question-points').value;
-            var partiallyAccepted = questionType === 'gpt_question';
-
-            var answers = [];
-            if (questionType === 'gpt_question') {
-                var answerText = questionDiv.querySelector('.answer-text').value;
-                answers.push({
-                    text: answerText,
-                    correct: true
-                });
-            } else {
-                var answerDivs = questionDiv.getElementsByClassName('answer-div');
-                for (var j = 0; j < answerDivs.length; j++) {
-                    var answerText = answerDivs[j].querySelector('.answer-text').value;
-                    var answerCorrect = answerDivs[j].querySelector('.answer-correct').checked;
-                    answers.push({
-                        text: answerText,
-                        correct: answerCorrect
-                    });
-                }
-            }
-
-            quizData.questions.push({
-                text: questionText,
-                points: questionPoints,
-                partially_accepted: partiallyAccepted,
-                question_type: questionType,
-                answers: answers
+      } else {
+        var answerDivs = questionDiv.getElementsByClassName("answer-div");
+        for (var j = 0; j < answerDivs.length; j++) {
+          var answerText = answerDivs[j].getElementsByClassName("answer-text")[0].value;
+          var answerCorrect = answerDivs[j].getElementsByClassName("answer-correct")[0].checked;
+            answers.push({
+              text: answerText,
+              correct: answerCorrect,
             });
+          }
         }
 
-        // AJAX request to save the quiz
-        fetch(document.getElementById('myForm').action, {
-            method: 'POST',
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(quizData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            const response_data = data;
-            if (response_data.errors) {
-                document.getElementById('errors').classList.remove('d-none');
-                document.getElementById('errors').innerHTML = response_data.errors.join(', ');
-            } else {
-                window.location.href = '/courses';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+      quizData.questions.push({
+        text: questionText,
+        points: questionPoints,
+        partially_accepted: partiallyAccepted,
+        question_type: questionType,
+        answers: answers,
+      });
     }
+
+    // AJAX request to save the quiz
+    fetch(document.getElementById("myForm").action, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(quizData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const response_data = data;
+        if (response_data.errors) {
+          document.getElementById("errors").classList.remove("d-none");
+          document.getElementById("errors").innerHTML =
+            response_data.errors.join(", ");
+        } else {
+          window.location.href = "/courses";
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 </script>
 
 {% endblock %}

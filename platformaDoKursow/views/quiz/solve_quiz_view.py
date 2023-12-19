@@ -14,7 +14,7 @@ class SolveQuizView(View):
     def get(self, request: HttpRequest, course_id: int, chapter_id: int) -> HttpResponse:
         try:
             course = Course.objects.get(
-                # participants__user=request.user,
+                participants__user=request.user,
                 id=course_id
             )
             quiz = Quiz.objects.prefetch_related('questions', 'questions__answers').get(
@@ -38,7 +38,7 @@ class SolveQuizView(View):
     def post(self, request: HttpRequest, course_id: int, chapter_id: int) -> HttpResponse:
         try:
             course = Course.objects.get(
-                # participants__user=request.user,
+                participants__user=request.user,
                 id=course_id
             )
             quiz = Quiz.objects.prefetch_related('questions', 'questions__answers').get(

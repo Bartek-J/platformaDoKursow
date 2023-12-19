@@ -28,6 +28,5 @@ class ScheduleTrainingView(View):
             messages.success(request, 'Successfully scheduled training.')
         else:
             messages.error(request, 'Invalid data.')
-            breakpoint()
 
         return redirect('trainings')

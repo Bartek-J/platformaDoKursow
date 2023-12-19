@@ -1,12 +1,11 @@
-from django.views import View
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpRequest
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from platformaDoKursow.forms.course_form import CourseForm
-from platformaDoKursow.models import Course, Participant
-from django.utils.decorators import method_decorator
 from platformaDoKursow.forms.chapter_form import ChapterForm
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.http import HttpResponse, HttpRequest
+from django.shortcuts import render, redirect
+from platformaDoKursow.models import Course
+from django.contrib import messages
+from django.views import View
 
 
 @method_decorator(login_required, name='dispatch')
