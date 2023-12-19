@@ -24,9 +24,10 @@ class ScheduleTrainingView(View):
 
         if form.is_valid():
             form.instance.creator = request.user
+            form.instance.time_duration = (form.instance.ending_time - form.instance.starting_time).total_seconds() / 60
             form.save()
             messages.success(request, 'Successfully scheduled training.')
         else:
-            messages.error(request, 'Invalid data.')
+            messages.error(request, f'Error: {form.errors.as_text()}')
 
         return redirect('trainings')

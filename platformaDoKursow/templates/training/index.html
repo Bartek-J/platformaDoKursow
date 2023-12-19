@@ -10,7 +10,7 @@
             <h5 class="card-title">{{ training.title }}</h5>
             <p class="card-text">{{ training.description }}</p>
             <p class="card-text">Starting Time: {{ training.starting_time }}</p>
-            <p class="card-text">Duration: {{ training.duration }} min</p>
+            <p class="card-text">Duration: {{ training.time_duration }} min</p>
         </div>
     </div>
     {% empty %}
@@ -24,7 +24,7 @@
             <h5 class="card-title">{{ training.title }}</h5>
             <p class="card-text">{{ training.description }}</p>
             <p class="card-text">Starting Time: {{ training.starting_time }}</p>
-            <p class="card-text">Duration: {{ training.duration }} min</p>
+            <p class="card-text">Duration: {{ training.time_duration }} min</p>
             <a href="{% url 'join_training' training.id %}" class="btn btn-primary">Join</a>
         </div>
     </div>
@@ -39,7 +39,7 @@
             <h5 class="card-title">{{ training.title }}</h5>
             <p class="card-text">{{ training.description }}</p>
             <p class="card-text">Starting Time: {{ training.starting_time }}</p>
-            <p class="card-text">Duration: {{ training.duration }} min</p>
+            <p class="card-text">Duration: {{ training.time_duration }} min</p>
         </div>
     </div>
     {% empty %}

@@ -43,26 +43,29 @@
         form.addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
 
-            const questions = document.querySelectorAll('#quiz > li');
-            const requestData = Array.from(questions).map(question => {
+            const questions = document.querySelectorAll('#quizForm > .list-group > li');
+            const requestData = Array.from(questions).reduce((acc, question) => {
                 const questionId = question.id.split('_')[1];
                 const questionType = question.getAttribute('data-question-type');
-                let selectedAnswers;
 
+                let selectedAnswers;
                 if (questionType === 'gpt_question') {
                     const textarea = question.querySelector('textarea');
-                    selectedAnswers = textarea.value ? [textarea.value] : [];
+                    selectedAnswers = textarea.value ? textarea.value : '';
                 } else {
                     const inputs = question.querySelectorAll('input[type="checkbox"]:checked');
                     selectedAnswers = Array.from(inputs).map(input => parseInt(input.value));
                 }
 
-                return {
+                acc.push({
                     question_id: parseInt(questionId),
                     selected_answers: selectedAnswers
-                };
-            });
+                });
 
+                return acc;
+            }, []);
+
+            console.log(requestData);
             fetch(form.action, {
                 method: 'POST',
                 headers: {

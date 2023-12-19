@@ -47,7 +47,7 @@ class SolveQuizView(View):
             )
         except (Quiz.DoesNotExist, Course.DoesNotExist):
             messages.error(request, 'Quiz not found.')
-            return JsonResponse(data={'errors': 'Chapter not found.'}, status=400)
+            return JsonResponse(data={'errors': 'Quiz not found.'}, status=400)
 
         try:
             SolveQuizService(
@@ -55,7 +55,7 @@ class SolveQuizView(View):
             ).run()
         except SolveQuizServiceError as e:
             messages.error(request, str(e))
-            return JsonResponse(data={'errors': 'Chapter not found.'}, status=400)
+            return JsonResponse(data={'errors': str(e)}, status=400)
 
         messages.success(request, 'Quiz attempt was saved.')
         return JsonResponse(data={'message': 'success'}, status=200)
